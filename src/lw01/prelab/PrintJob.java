@@ -1,33 +1,37 @@
 package lw01.prelab;
 
-public abstract class PrintJob implements Chargeable {
+public abstract class PrintJob implements Chargeable{
     private String id;
     private int pages;
 
-    protected PrintJob(String id, int pages) {
+    protected PrintJob(String id, int pages){
         if (pages <= 0) {
-            throw new IllegalArgumentException("Pages must be greater than zero");
+            throw new IllegalArgumentException("Pages harus lebih dari 0");
         }
         this.id = id;
         this.pages = pages;
     }
 
-    public String getId() { return id; }
-    public int getPages() { return pages; }
+    public String getId(){
+        return id; 
+    }
+    public int getPages(){
+        return pages;
+    }
 
     @Override
     public abstract int calculateCharge();
 
-    public int calculateCharge(int copies) {
+    public int calculateCharge(int copies){
         if (copies <= 0) {
-            throw new IllegalArgumentException("Copies must be greater than zero");
+            throw new IllegalArgumentException("Harus bernilai lebih dari 0");
         }
         return copies * calculateCharge();
     }
 
     public abstract String label();
 
-    public String summary() {
+    public String summary(){
         return id + " | " + label() + " | " + calculateCharge();
     }
 }
