@@ -4,78 +4,74 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Stack;
 import java.util.Scanner;
-import java.io.InputStream;
 
 public class Main {
     public static void main(String[] args) {
         LinkedList<String[]> transactions = new LinkedList<>();
         LinkedList<String[]> customers = new LinkedList<>();
 
-        InputStream inputStream = Main.class.getResourceAsStream("transactions.txt");
-        if (inputStream == null) {
-            System.out.println("File transactions.txt tidak ditemukan!");
-            return;
-        }
+        Queue<String[]> queue = new LinkedList<>();
+        Stack<String[]> failed = new Stack<>();
 
-        Scanner scanner = new Scanner(inputStream);
+        Scanner scanner = new Scanner(Main.class.getResourceAsStream("transactions.txt"));
 
         while (scanner.hasNext()) {
-            String name = scanner.next();
-            String type = scanner.next();
-            String amountStr = scanner.next();
-
-            transactions.add(new String[]{name, type, amountStr});
-
-            boolean customerExists = false;
-            for (String[] cust : customers) {
-                if (cust[0].equals(name)) {
-                    customerExists = true;
-                    break;
-                }
-            }
-
-            if (!customerExists) {
-                customers.add(new String[]{name, "0"});
-            }
+            String[] transaction = new String[3];
+            transaction[0] = scanner.next();
+            transaction[1] = scanner.next();
+            transaction[2] = scanner.next();
+            transactions.add(transaction);
         }
+
         scanner.close();
 
-        Queue<String[]> queue = new LinkedList<>(transactions);
-        Stack<String[]> failedTransactions = new Stack<>();
+        queue.addAll(transactions);
 
-        while (!queue.isEmpty()) {
-            String[] trx = queue.poll();
-            String name = trx[0];
-            String type = trx[1];
-            int amount = Integer.parseInt(trx[2]);
+        while(!queue.isEmpty()) {
+            String[] transaction = queue.poll();
 
-            for (String[] cust : customers) {
-                if (cust[0].equals(name)) {
-                    int currentBalance = Integer.parseInt(cust[1]);
+            String name = transaction[0];
+            String type = transaction[1];
+            int amount = Integer.parseInt(transaction[2]);
 
-                    if (type.equals("DEPOSIT")) {
-                        cust[1] = String.valueOf(currentBalance + amount);
-                    } else if (type.equals("WITHDRAW")) {
-                        if (amount > currentBalance) {
-                            failedTransactions.push(trx);
-                        } else {
-                            cust[1] = String.valueOf(currentBalance - amount);
-                        }
-                    }
+            String[] customer = null;
+
+            for(String[] data : customers) {
+                if(data[0].equals(name)) {
+                    customer = data;
                     break;
+                }
+            }
+
+            if(customer == null) {
+                customer = new String[]{name, "0"};
+                customers.add(customer);
+            }
+
+            int balance = Integer.parseInt(customer[1]);
+
+            if(type.equals("DEPOSIT")) {
+                balance += amount;
+                customer[1] = String.valueOf(balance);
+            } else if(type.equals("WITHDRAW")) {
+                if(amount <= balance) {
+                    balance -= amount;
+                    customer[1] = String.valueOf(balance);
+                } else {
+                    failed.push(transaction);  
                 }
             }
         }
 
-        System.out.println("=== Final Balances ===");
+        System.out.println("\n=== Final Balances ===");
         for (String[] cust : customers) {
             System.out.println(cust[0] + " : " + cust[1]);
         }
 
-        System.out.println("=== Failed Transactions ===");
-        while (!failedTransactions.isEmpty()) {
-            String[] failed = failedTransactions.pop();
-            System.out.println(failed[0] + " " + failed[1] + " " + failed[2]);
+        System.out.println("\n=== Failed Transactions ===");
+        while (!failed.isEmpty()) {
+            String[] failedTrx = failed.pop(); 
+            System.out.println(failedTrx[0] + " " + failedTrx[1] + " " + failedTrx[2]);
         }
     }
 }
