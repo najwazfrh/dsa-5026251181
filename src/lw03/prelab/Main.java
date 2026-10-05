@@ -79,7 +79,7 @@ public class Main {
         }
         System.out.println("Duplicate registrations: " + duplicates);
     }
-
+    
     static void problem3() {
         Map<String, Integer> stock = new LinkedHashMap<>();
         int failedSales = 0;
